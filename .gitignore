@@ -1,0 +1,6 @@
+$ cat .gitignore
+*.[oa]
+*~
+src/bower_components
+dist/
+node_modules
