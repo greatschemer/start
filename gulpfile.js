@@ -3,6 +3,7 @@ var gulp = require('gulp'),
 	jade = require('gulp-jade'),
 	sass = require('gulp-sass'),
 	prettify = require('gulp-prettify'),
+	autoprefixer = require('gulp-autoprefixer'),
 	browserSync = require('browser-sync'),
 	del = require('del'),
 	strip = require('gulp-strip-comments'),
@@ -16,7 +17,7 @@ var gulp = require('gulp'),
 
 
 //делаем сервер
-gulp.task('browser-sync', function(){
+gulp.task('server', function(){
 	browserSync({
 		server: {
 			baseDir: 'src'
@@ -30,6 +31,7 @@ gulp.task('browser-sync', function(){
 gulp.task('sass', function(){
 	return gulp.src('src/scss/**/*.scss')
 		.pipe(sass()).on('error', log)
+		.pipe(autoprefixer('last 5 versions', '>1%', 'ie 11'))
 		.pipe(gulp.dest('src/css'))
 		.pipe(browserSync.reload({stream:true}));
 });
@@ -44,6 +46,10 @@ gulp.task('jade', function() {
 		.pipe(browserSync.reload({stream:true}));
 });
 
+gulp.task('js', function(){
+	return gulp.src('src/js/**/*.js')
+	.pipe(browserSync.reload({stream:true}));
+})
 
 gulp.task('img', function(){
 	return gulp.src('src/img/**/*')
@@ -66,9 +72,16 @@ gulp.task('wiredep', function() {
 //{ignorePath: /^(\.\.\/)*\.\./}
 
 //создаем слежку
-gulp.task('watch', ['browser-sync','jade', 'sass', 'wiredep'], function(){
-	gulp.watch('src/templates/**/*.jade', ['jade']);
+gulp.task('watch', ['jade', 'sass', 'wiredep'], function(){
+	browserSync({
+		server: {
+			baseDir: 'src'
+		},
+		notify: false
+	})
+	gulp.watch('src/jade/**/*.jade', ['jade']);
 	gulp.watch('src/scss/**/*.scss', ['sass']);
+	gulp.watch('src/js/**/*.js', ['js']);
 	gulp.watch('bower.json', ['wiredep']);
 });
 
@@ -103,8 +116,8 @@ gulp.task('build', ['clean', 'img'], function(){
 	var buildImg = gulp.src('src/img/**/*')
 	.pipe(gulp.dest('dist/img'));
 
-	// var buildFonts = gulp.src('src/fonts/**/*')
-	// .pipe(gulp.dest('dist/fonts'));
+	var buildFonts = gulp.src('src/fonts/**/*')
+	.pipe(gulp.dest('dist/fonts'));
 
 	// var buildJs = gulp.src('src/js/**/*')
 	// .pipe(gulp.dest('dist/js'));
